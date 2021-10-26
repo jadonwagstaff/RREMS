@@ -24,8 +24,8 @@ do
     echo "ADDING BARCODES FOR " $sample
     echo "====================================================="
     echo ""
-    python addBarcodes_novaseq_variableSize.py -d "$from/$sample"_*_R1_* -b "$from/$sample"_*_R2_* -o "$to/$sample"_R1.fastq -s $sample -n 12 &
-    python addBarcodes_novaseq_variableSize.py -d "$from/$sample"_*_R3_* -b "$from/$sample"_*_R2_* -o "$to/$sample"_R3.fastq -s $sample -n 12 &
+    awk -f barcode.awk "$from/$sample"_*_R2_* "$from/$sample"_*_R1_* > "$to/$sample"_test.fastq &
+    awk -f barcode.awk "$from/$sample"_*_R2_* "$from/$sample"_*_R3_* > "$to/$sample"_R3.fastq &
     wait
 
     # Re-compress raw data
