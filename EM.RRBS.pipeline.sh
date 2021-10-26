@@ -76,23 +76,13 @@ do
     # Clean up output
     mv "$to/$sample"_splitting_report.txt "$to/$sample".bam_splitting_report.txt &
     mv "$to/$sample".M-bias.txt "$to/$sample".bam_M-bias.txt &
-    awk '{if (NR > 1) {print $3, $4 - 1, $5}}' "$to"/CpG_OB_"$sample".txt > "$to/$sample"_OB.txt &
-    awk '{if (NR > 1) {print $3, $4, $5}}' "$to"/CpG_OT_"$sample".txt > "$to/$sample"_OT.txt &
+    bash countz.sh "$to"/CpG_OB_"$sample".txt "$to"/CpG_OT_"$sample".txt > "$to/$sample"_methylation.cov &
     wait
     
     rm "$to"/CHG_*_"$sample".txt &
     rm "$to"/CHH_*_"$sample".txt &
     rm "$to"/CpG_*_"$sample".txt &
     wait
-    
-    # Combine top and bottom strand then count number of methylated and unmethylated
-    cat "$to/$sample"_OB.txt "$to/$sample"_OT.txt |
-    awk '{if (NR != 1) a[$0]++ } END{for (x in a) print x, a[x]}' |
-    awk '{if ($3 == "Z") print $1, $2, $4, 0; else print $1, $2, 0, $4}' |
-    awk '{a[$1 " " $2] += $3; b[$1 " " $2] += $4} END{for (x in a) print x, a[x], b[x]}' |
-    awk 'BEGIN{OFS = "\t"} {$1 = $1; if ($3 + $4 >= 10) print $1, $2 - 1, $2 + 1, $3 / ($3 + $4), $3, $4}' > "$to/$sample"_methylation.cov
-    
-    rm "$to/$sample"_OB.txt "$to/$sample"_OT.txt
     
     # Make color bed file
     awk -v name=$sample -f colorbed.awk "$to/$sample"_methylation.cov > "$to/$sample"_methylation.bed

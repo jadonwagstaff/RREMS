@@ -1,7 +1,7 @@
 # Adds barcodes to reads by appending barcode sequence to name of read
 # ==============================================================================
 # Parameters:
-#   barcode.fastq file firest
+#   barcode.fastq file first
 #   read.fastq file second
 # ==============================================================================
 # Example:
