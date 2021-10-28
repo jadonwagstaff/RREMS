@@ -1,3 +1,5 @@
+#! /usr/bin/awk -f
+
 # Makes a bed file from .cov file with color corresponding to percent
 # methylation
 # ==============================================================================

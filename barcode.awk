@@ -1,3 +1,5 @@
+#! /usr/bin/awk -f
+
 # Adds barcodes to reads by appending barcode sequence to name of read
 # ==============================================================================
 # Parameters:

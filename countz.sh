@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Combine top and bottom strand then count number of methylated and unmethylated
 # ==============================================================================
 # Parameters:

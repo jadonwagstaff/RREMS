@@ -31,7 +31,6 @@ show_help() {
 }
 
 # Set variables
-wd="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 r2=
 name=
 ref=
@@ -102,8 +101,8 @@ echo "====================================================="
 echo "ADDING BARCODES FOR " $name
 echo "====================================================="
 echo ""
-awk -f "$wd"/barcode.awk "$r2" "$r1" > "$to/$name"_R1.fastq &
-awk -f "$wd"/barcode.awk "$r2" "$r3" > "$to/$name"_R3.fastq &
+./barcode.awk "$r2" "$r1" > "$to/$name"_R1.fastq &
+./barcode.awk "$r2" "$r3" > "$to/$name"_R3.fastq &
 wait
 
 # Re-compress raw data
@@ -155,7 +154,7 @@ bismark_methylation_extractor --output $to --multicore $cores --paired-end "$to/
 # Clean up output
 mv "$to/$name"_splitting_report.txt "$to/$name".bam_splitting_report.txt &
 mv "$to/$name".M-bias.txt "$to/$name".bam_M-bias.txt &
-bash "$wd"/countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt > "$to/$name"_methylation.cov &
+./countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt > "$to/$name"_methylation.cov &
 wait
 
 rm "$to"/CHG_*_"$name".txt &
@@ -164,4 +163,4 @@ rm "$to"/CpG_*_"$name".txt &
 wait
 
 # Make color bed file
-awk -v name=$name -f "$wd"/colorbed.awk "$to/$name"_methylation.cov > "$to/$name"_methylation.bed
+./colorbed.awk -v name=$name "$to/$name"_methylation.cov > "$to/$name"_methylation.bed
