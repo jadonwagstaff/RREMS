@@ -57,7 +57,7 @@ while getopts ":h:n:o:r:b:c:" option; do
             cores=$OPTARG;;
         \?) # Invalid option
             echo "Error: Invalid option"
-            exit;;
+            exit 1;;
    esac
 done
 shift $(( OPTIND-1 ))
@@ -65,6 +65,25 @@ shift $(( OPTIND-1 ))
 # main input
 r1=$1
 r3=$2
+
+# Check input
+if [ "$r1" = "" ]; then
+    echo "Error: parameter 1 is missing, need forward reads"
+    exit 1
+fi
+if [ "$r3" = "" ]; then
+    echo "Error: parameter 2 is missing, need reverse reads"
+fi
+if [ "$r2" = "" ]; then
+    echo "Error: barcode file is missing, need -b value"
+fi
+if [ "$name" = "" ]; then
+    echo "Error: name is missing, need -n value"
+fi
+if [ "$name" = "" ]; then
+    echo "Error: reference directory is missing, need -r value"
+fi
+
 
 
 
