@@ -72,15 +72,19 @@ if [ "$r1" = "" ]; then
 fi
 if [ "$r3" = "" ]; then
     echo "Error: parameter 2 is missing, need reverse reads"
+    exit 1
 fi
 if [ "$r2" = "" ]; then
     echo "Error: barcode file is missing, need -b value"
+    exit 1
 fi
 if [ "$name" = "" ]; then
     echo "Error: name is missing, need -n value"
+    exit 1
 fi
 if [ "$name" = "" ]; then
     echo "Error: reference directory is missing, need -r value"
+    exit 1
 fi
 
 
@@ -101,8 +105,8 @@ echo "====================================================="
 echo "ADDING BARCODES FOR " $name
 echo "====================================================="
 echo ""
-./barcode.awk "$r2" "$r1" > "$to/$name"_R1.fastq &
-./barcode.awk "$r2" "$r3" > "$to/$name"_R3.fastq &
+barcode.awk "$r2" "$r1" > "$to/$name"_R1.fastq &
+barcode.awk "$r2" "$r3" > "$to/$name"_R3.fastq &
 wait
 
 # Re-compress raw data
@@ -154,7 +158,7 @@ bismark_methylation_extractor --output $to --multicore $cores --paired-end "$to/
 # Clean up output
 mv "$to/$name"_splitting_report.txt "$to/$name".bam_splitting_report.txt &
 mv "$to/$name".M-bias.txt "$to/$name".bam_M-bias.txt &
-./countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt > "$to/$name"_methylation.cov &
+countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt > "$to/$name"_methylation.cov &
 wait
 
 rm "$to"/CHG_*_"$name".txt &
@@ -163,4 +167,4 @@ rm "$to"/CpG_*_"$name".txt &
 wait
 
 # Make color bed file
-./colorbed.awk -v name=$name "$to/$name"_methylation.cov > "$to/$name"_methylation.bed
+colorbed.awk -v name=$name "$to/$name"_methylation.cov > "$to/$name"_methylation.bed
