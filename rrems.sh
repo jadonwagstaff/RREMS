@@ -21,20 +21,16 @@ show_help() {
    echo "Required:"
    echo "-n    Sample name."
    echo "-r    Reference directory."
-   echo "-b    Barcode file."
    echo "Optional"
-   echo "-o    Output directory (default current directory)."
-   echo "-c    Number of cores (default 6)"
+   echo "-c    Number of cores (default 1)"
    echo "-h    Print this help."
    echo
 }
 
 # Set variables
-r2=
 name=
 ref=
-to="."
-cores=6
+cores=1
 
 # Process options
 OPTIND=1
@@ -47,10 +43,6 @@ while getopts "hn:o:r:b:c:" option; do
             name=$OPTARG;;
         r) # reference directory
             ref=$OPTARG;;
-        b) # Barcodes
-            r2=$OPTARG;;
-        o) # output directory
-            to=$OPTARG;;
         c) # cores
             cores=$OPTARG;;
         \?) # Invalid option
@@ -63,6 +55,7 @@ shift $(( OPTIND-1 ))
 # main input
 r1=$1
 r3=$2
+to=`dirname $r1`
 
 # Check input
 if [[ -z $r1 ]]; then
@@ -70,12 +63,7 @@ if [[ -z $r1 ]]; then
     exit 1
 fi
 if [[ -z $r3 ]]; then
-    echo "Error: parameter 2 is missing, need reverse reads"
-    exit 1
-fi
-if [[ -z $r2 ]]; then
-    echo "Error: barcode file is missing, need -b value"
-    exit 1
+    echo "Error: parameter 2 is missing, need forward reads"
 fi
 if [[ -z $name ]]; then
     echo "Error: name is missing, need -n value"
@@ -92,42 +80,18 @@ fi
 # Pipeline
 # ==============================================================================
 
-# Uncompress raw data
-gunzip "$r1" "$r2" "$r3"
-r1="${r1%.gz}"
-r2="${r2%.gz}"
-r3="${r3%.gz}"
-
-
-###   Add Barcodes   ###
-echo "====================================================="
-echo "ADDING BARCODES FOR " $name
-echo "====================================================="
-echo ""
-barcode.awk "$r2" "$r1" > "$to/$name"_R1.fastq &
-barcode.awk "$r2" "$r3" > "$to/$name"_R3.fastq &
-wait
-
-# Re-compress raw data
-gzip "$r1" "$r2" "$r3"
-
-# Make variables (clean reads)
-c1="$to/$name"_R1
-c3="$to/$name"_R3
-
-
 ###   Trim Adapters   ###
 echo "====================================================="
 echo "TRIMMING ADAPTERS FOR " $name
 echo "====================================================="
-trim_galore --output_dir $to --rrbs --fastqc --paired "$c1".fastq "$c3".fastq
+trim_galore --output_dir $to --rrbs --fastqc --paired "$r1" "$r3"
 
 # Clean up output
-mv "$c1"_val_1.fq "$c1".fastq &
-mv "$c3"_val_2.fq "$c3".fastq &
-mv "$c1"_val_1_fastqc.html "$c1".fastq_fastqc_report.html &
-mv "$c3"_val_2_fastqc.html "$c3".fastq_fastqc_report.html &
-rm "$c1"_val_1_fastqc.zip "$c3"_val_2_fastqc.zip &
+mv "${r1%.fastq}"_val_1.fq "$r1" &
+mv "${r3%.fastq}"_val_2.fq "$r3" &
+mv "${r1%.fastq}"_val_1_fastqc.html "$r1"_fastqc_report.html &
+mv "${r3%.fastq}"_val_2_fastqc.html "$r3"_fastqc_report.html &
+rm "${r1%.fastq}"_val_1_fastqc.zip "${r3%.fastq}"_val_2_fastqc.zip &
 wait
 
 
@@ -137,14 +101,15 @@ echo "ALIGNING READS FOR " $name
 echo "====================================================="
 echo ""
 bismark --quiet --output $to --parallel $cores --bowtie2 --un --ambiguous \
-    -N 1 --non_bs_mm --genome_folder "$ref" -1 "$c1".fastq -2 "$c3".fastq
+    -N 1 --temp_dir TempDelme --non_bs_mm --genome_folder "$ref"  \
+    -1 "$r1" -2 "$r3"
 
 # Clean up output
-mv "$c1"_bismark_bt2_PE_report.txt "$to/$name".bam_bismark_report.txt
-mv "$c1"_bismark_bt2_pe.bam "$to/$name".bam
+mv "${r1%.fastq}"_bismark_bt2_PE_report.txt "$to/$name".bam_bismark_report.txt
+mv "${r3%.fastq}"_bismark_bt2_pe.bam "$to/$name".bam
 
 # Compress clean data
-gzip "$to/$name"*.fastq
+gzip "$r1" "$r3"
 
 
 ###   Extract Methylation Data   ###
@@ -166,4 +131,5 @@ rm "$to"/CpG_*_"$name".txt &
 wait
 
 # Make color bed file
-colorbed.awk -v name=$name "$to/$name"_methylation.cov > "$to/$name"_methylation.bed
+colorbed.awk -v name=$name "$to/$name"_methylation.cov \
+    > "$to/$name"_methylation.bed
