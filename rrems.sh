@@ -18,7 +18,6 @@ show_help() {
    echo
    echo "Outputs a .cov file and a .bed file."
    echo
-   echo "Syntax:  [-n|r|b|o|c|h]"
    echo "Required:"
    echo "-n    Sample name."
    echo "-r    Reference directory."
@@ -39,7 +38,7 @@ cores=6
 
 # Process options
 OPTIND=1
-while getopts ":h:n:o:r:b:c:" option; do
+while getopts "hn:o:r:b:c:" option; do
     case $option in
         h) # display Help
             show_help
@@ -66,23 +65,23 @@ r1=$1
 r3=$2
 
 # Check input
-if [ "$r1" = "" ]; then
+if [[ -z $r1 ]]; then
     echo "Error: parameter 1 is missing, need forward reads"
     exit 1
 fi
-if [ "$r3" = "" ]; then
+if [[ -z $r3 ]]; then
     echo "Error: parameter 2 is missing, need reverse reads"
     exit 1
 fi
-if [ "$r2" = "" ]; then
+if [[ -z $r2 ]]; then
     echo "Error: barcode file is missing, need -b value"
     exit 1
 fi
-if [ "$name" = "" ]; then
+if [[ -z $name ]]; then
     echo "Error: name is missing, need -n value"
     exit 1
 fi
-if [ "$name" = "" ]; then
+if [[ -z $ref ]]; then
     echo "Error: reference directory is missing, need -r value"
     exit 1
 fi
@@ -137,8 +136,8 @@ echo "====================================================="
 echo "ALIGNING READS FOR " $name
 echo "====================================================="
 echo ""
-bismark --quiet --output $to --multicore $cores --bowtie2 --un --ambiguous \
-    -N 1 --temp_dir TempDelme --non_bs_mm "$ref" -1 "$c1".fastq -2 "$c3".fastq
+bismark --quiet --output $to --parallel $cores --bowtie2 --un --ambiguous \
+    -N 1 --non_bs_mm --genome_folder "$ref" -1 "$c1".fastq -2 "$c3".fastq
 
 # Clean up output
 mv "$c1"_bismark_bt2_PE_report.txt "$to/$name".bam_bismark_report.txt
