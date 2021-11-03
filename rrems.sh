@@ -84,7 +84,8 @@ fi
 echo "====================================================="
 echo "TRIMMING ADAPTERS FOR " $name
 echo "====================================================="
-trim_galore --output_dir $to --rrbs --fastqc --paired "$r1" "$r3"
+trim_galore --output_dir $to --cores $((cores<4 ? 1 : 4)) --rrbs --fastqc \
+    --paired "$r1" "$r3"
 
 # Clean up output
 mv "${r1%.fastq}"_val_1.fq "$r1" &

@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH -t 150:00:00 -N 1 --account=varley-kp --partition=varley-kp
 
+ml python
 ml singularity
 
 # Change this to the directory where your data is located
@@ -34,18 +35,18 @@ do
     wait
     
     # Add barcodes
-    singularity exec "$sb"/rrems-v0.1.0.sif barcode.awk \
-        "$from/$sample"_*_R2_* "$from/$sample"_*_R1_* > "$to/$sample"_R1.fastq &
-    singularity exec "$sb"/rrems-v0.1.0.sif barcode.awk \
-        "$from/$sample"_*_R2_* "$from/$sample"_*_R3_* > "$to/$sample"_R3.fastq &
+    python add_barcodes.py -n 12 \
+        -b "$from/$sample"_*_R2_* -d "$from/$sample"_*_R1_* -o "$to/$sample"_R1.fastq &
+    python add_barcodes.py -n 12 \
+        -b "$from/$sample"_*_R2_* -d "$from/$sample"_*_R3_* -o "$to/$sample"_R3.fastq &
     wait
     
     # Zip raw data
-    gzip "$from/$sample"_*
+    gzip "$from/$sample"_* &
     
     
     # Align reads and get methylation
-    singularity exec "$sb"/rrems-v0.1.0.sif rrems.sh \
+    singularity exec "$sb"/rrems-v0.1.0.sif --no-home --cleanenv rrems.sh \
         -c 6 -n "$sample" -r "$refpath" \
         "$to/$sample"_R1.fastq "$to/$sample"_R3.fastq
 
