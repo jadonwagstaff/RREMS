@@ -106,7 +106,7 @@ bismark --quiet --output $to --parallel $cores --bowtie2 --un --ambiguous \
 
 # Clean up output
 mv "${r1%.fastq}"_bismark_bt2_PE_report.txt "$to/$name".bam_bismark_report.txt
-mv "${r3%.fastq}"_bismark_bt2_pe.bam "$to/$name".bam
+mv "${r1%.fastq}"_bismark_bt2_pe.bam "$to/$name".bam
 
 # Compress clean data
 gzip "$r1" "$r3"
@@ -117,7 +117,7 @@ echo "====================================================="
 echo "EXTRACTING MMETHYLATION DATA FOR " $name
 echo "====================================================="
 echo ""
-bismark_methylation_extractor --output $to --multicore $cores --paired-end --include_overlap "$to/$name".bam
+bismark_methylation_extractor --output $to --multicore $cores --paired-end "$to/$name".bam
 
 # Clean up output
 mv "$to/$name"_splitting_report.txt "$to/$name".bam_splitting_report.txt &
