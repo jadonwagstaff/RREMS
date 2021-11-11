@@ -1,17 +1,17 @@
 #!/bin/bash
-#SBATCH -t 150:00:00 -N 1 --account=varley-kp --partition=varley-kp
+#SBATCH --time=50:00:00 --nodes=1 --ntasks=13 --mem=90G --account=varley-kp --partition=varley-shared-kp
 
 ml python
 ml singularity
 
 # Change this to the directory where your data is located
-from="Fastq"
+from="../Fastq"
 # Change this to the directory where you want the alignments to be saved
-to="Aligned"
+to="../Aligned"
 # Change this to the reference path
 refpath="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/ReferenceGenomes/hg19"
 # Change this to the location of the singularity docker build
-sb="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff"
+sb="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/Pipelines"
 
 
 # This will loop through all of the samples where each sample has a unique beginning
@@ -21,10 +21,13 @@ sb="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff"
 # follow this pattern then this loop will need to be rewritten.
 samples=$(ls $from | awk -F_ '{print $1}' | uniq)
 
+echo "Job Started"
+date
+
 while IFS= read -r sample
 do
     echo "====================================================="
-    echo "PROCESSING SAMPLE " $name
+    echo "PROCESSING SAMPLE " $sample
     echo "====================================================="
     
     # Make a new directory
@@ -46,10 +49,16 @@ do
     
     
     # Align reads and get methylation
-    singularity exec "$sb"/rrems-v0.1.0.sif --no-home --cleanenv rrems.sh \
-        -c 6 -n "$sample" -r "$refpath" \
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.0.sif rrems.sh \
+        -c 12 -n "$sample" -r "$refpath" \
         "$to/$sample"_R1.fastq "$to/$sample"_R3.fastq
+    wait
 
 done <<< "$samples"
+
+rm -r ../TempDelme
+echo ""
+echo "Job Finished"
+date
 
 

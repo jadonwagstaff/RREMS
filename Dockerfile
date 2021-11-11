@@ -1,6 +1,7 @@
 FROM continuumio/miniconda3
 
 RUN conda install python=3.6 && \
+    conda install -c conda-forge gawk=4.2.1 && \
     conda install -c conda-forge tbb=2020.2 && \
     conda install -c bioconda samtools=1.12 && \
     conda install -c bioconda cutadapt=1.18 && \
