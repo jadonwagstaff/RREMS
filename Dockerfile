@@ -13,11 +13,11 @@ RUN conda install python=3.6 && \
     git clone https://github.com/jadonwagstaff/rrems
 
 RUN mv rrems/rrems.sh usr/bin && \
-    mv rrems/barcode.awk usr/bin && \
+    mv rrems/add_barcodes.py usr/bin && \
     mv rrems/countz.sh usr/bin && \
     mv rrems/colorbed.awk usr/bin
 
 RUN chmod +rx usr/bin/rrems.sh && \
-    chmod +rx usr/bin/barcode.awk && \
+    chmod +rx usr/bin/add_barcodes.py && \
     chmod +rx usr/bin/countz.sh && \
     chmod +rx usr/bin/colorbed.awk

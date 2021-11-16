@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --time=50:00:00 --nodes=1 --ntasks=13 --mem=90G --account=varley-kp --partition=varley-shared-kp
 
-ml python
 ml singularity
 
 # Change this to the directory where your data is located
@@ -14,11 +13,12 @@ refpath="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/
 sb="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/Pipelines"
 
 
-# This will loop through all of the samples where each sample has a unique beginning
-# before the "_" character. For example 19009X1_..._R1_001.fastq, 19009X1_..._R2_001.fastq,
-# and 19009X1_..._R3_001.fastq are all sample 19009X1 where R1 are the forward reads,
-# R2 are the barcodes, and R3 are the reverse reads. If the naming convention does not
-# follow this pattern then this loop will need to be rewritten.
+# This will loop through all of the samples where each sample has a unique
+# beginning before the "_" character. For example 19009X1_..._R1_001.fastq,
+# 19009X1_..._R2_001.fastq, and 19009X1_..._R3_001.fastq are all sample 19009X1
+# where R1 are the forward reads, R2 are the barcodes, and R3 are the reverse
+# reads. If the naming convention does not follow this pattern then this loop
+# will need to be rewritten.
 samples=$(ls $from | awk -F_ '{print $1}' | uniq)
 
 echo "Job Started"
@@ -38,10 +38,12 @@ do
     wait
     
     # Add barcodes
-    python add_barcodes.py -n 12 \
-        -b "$from/$sample"_*_R2_* -d "$from/$sample"_*_R1_* -o "$to/$sample"_R1.fastq &
-    python add_barcodes.py -n 12 \
-        -b "$from/$sample"_*_R2_* -d "$from/$sample"_*_R3_* -o "$to/$sample"_R3.fastq &
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.0.sif \
+        add_barcodes.py -n 12  -b "$from/$sample"_*_R2_* \
+        -d "$from/$sample"_*_R1_* -o "$to/$sample"_R1.fastq &
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.0.sif \
+        add_barcodes.py -n 12  -b "$from/$sample"_*_R2_* \
+        -d "$from/$sample"_*_R3_* -o "$to/$sample"_R3.fastq &
     wait
     
     # Zip raw data
@@ -56,7 +58,6 @@ do
 
 done <<< "$samples"
 
-rm -r ../TempDelme
 echo ""
 echo "Job Finished"
 date
