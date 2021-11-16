@@ -157,7 +157,7 @@ wait
 # Clean up output
 mv "$to/$name"_splitting_report.txt "$to/$name".bam_splitting_report.txt &
 mv "$to/$name".M-bias.txt "$to/$name".bam_M-bias.txt &
-countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt >
+countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt > \
     "$to/$name"_methylation.cov &
 wait
 
@@ -167,4 +167,5 @@ rm "$to"/CpG_*_"$name".txt &
 wait
 
 # Make color bed file
-colorbed.awk -v name=$name "$to/$name"_methylation.cov > "$to/$name"_methylation.bed
+colorbed.awk -v name=$name "$to/$name"_methylation.cov > \
+    "$to/$name"_methylation.bed
