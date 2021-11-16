@@ -11,6 +11,8 @@ to="../Aligned"
 refpath="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/ReferenceGenomes/hg19"
 # Change this to the location of the singularity docker build
 sb="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/Pipelines"
+# Change this for the appropriate number of parallel assemblies
+p=12
 
 
 # This will loop through all of the samples where each sample has a unique
@@ -38,10 +40,10 @@ do
     wait
     
     # Add barcodes
-    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.0.sif \
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif \
         add_barcodes.py -n 12  -b "$from/$sample"_*_R2_* \
         -d "$from/$sample"_*_R1_* -o "$to/$sample"_R1.fastq &
-    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.0.sif \
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif \
         add_barcodes.py -n 12  -b "$from/$sample"_*_R2_* \
         -d "$from/$sample"_*_R3_* -o "$to/$sample"_R3.fastq &
     wait
@@ -51,8 +53,8 @@ do
     
     
     # Align reads and get methylation
-    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.0.sif rrems.sh \
-        -c 12 -n "$sample" -r "$refpath" \
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif rrems.sh \
+        -c $p -n "$sample" -r "$refpath" \
         "$to/$sample"_R1.fastq "$to/$sample"_R3.fastq
     wait
 

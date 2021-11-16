@@ -11,6 +11,8 @@ to="../Aligned"
 refpath="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/ReferenceGenomes/hg19"
 # Change this to the location of the singularity docker build
 sb="/uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/Pipelines"
+# Change this for the appropriate number of parallel assemblies
+p=12
 
 
 # This will loop through all of the samples where each sample has a unique
@@ -36,8 +38,8 @@ do
     wait
     
     # Align reads and get methylation
-    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.0.sif rrems.sh \
-        -c 12 -n "$sample" -r "$refpath" "$to/$sample".fastq
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif rrems.sh \
+        -c $p -n "$sample" -r "$refpath" "$to/$sample".fastq
     wait
 
 done <<< "$samples"
@@ -45,5 +47,6 @@ done <<< "$samples"
 echo ""
 echo "Job Finished"
 date
+
 
 

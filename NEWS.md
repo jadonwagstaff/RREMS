@@ -1,5 +1,4 @@
 # rrems v0.1.1
-### In development.
 
 ## Backward compatible changes
 
