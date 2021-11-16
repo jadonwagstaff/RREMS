@@ -6,7 +6,7 @@
 # Help function
 show_help() {
    echo "Runs rrems pipeline with the following options:"
-   echo "trim-galore --rrbs --fastqc --paired"
+   echo "trim-galore --rrbs --fastqc (--paired if two files provided)"
    echo "bismark --quiet --bowtie2 --un --ambiguous"
    echo "bismark_methylation_extractor --paired-end"
    echo
@@ -63,7 +63,7 @@ if [[ -z $r1 ]]; then
     exit 1
 fi
 if [[ -z $r3 ]]; then
-    echo "Error: parameter 2 is missing, need forward reads"
+    echo "Warning: parameter 2 is missing, single end reads assumed"
 fi
 if [[ -z $name ]]; then
     echo "Error: name is missing, need -n value"
@@ -84,16 +84,32 @@ fi
 echo "====================================================="
 echo "TRIMMING ADAPTERS FOR " $name
 echo "====================================================="
-trim_galore --output_dir $to --cores $((cores<4 ? 1 : 4)) --rrbs --fastqc \
-    --paired "$r1" "$r3"
+if [[ -z $r3 ]]; then
+    # Single
+    trim_galore --output_dir $to --cores $((cores<4 ? 1 : 4)) --rrbs --fastqc \
+    "$r1"
+else
+    # Paired
+    trim_galore --output_dir $to --cores $((cores<4 ? 1 : 4)) --rrbs --fastqc \
+        --paired "$r1" "$r3"
+fi
 
 # Clean up output
-mv "${r1%.fastq}"_val_1.fq "$r1" &
-mv "${r3%.fastq}"_val_2.fq "$r3" &
-mv "${r1%.fastq}"_val_1_fastqc.html "$r1"_fastqc_report.html &
-mv "${r3%.fastq}"_val_2_fastqc.html "$r3"_fastqc_report.html &
-rm "${r1%.fastq}"_val_1_fastqc.zip "${r3%.fastq}"_val_2_fastqc.zip &
-wait
+if [[ -z $r3 ]]; then
+    # Single
+    mv "${r1%.fastq}"_trimmed.fq "$r1" &
+    mv "${r1%.fastq}"_trimmed_fastqc.html "$r1"_fastqc_report.html &
+    rm "${r1%.fastq}"_trimmed_fastqc.zip &
+    wait
+else
+    # Paired
+    mv "${r1%.fastq}"_val_1.fq "$r1" &
+    mv "${r3%.fastq}"_val_2.fq "$r3" &
+    mv "${r1%.fastq}"_val_1_fastqc.html "$r1"_fastqc_report.html &
+    mv "${r3%.fastq}"_val_2_fastqc.html "$r3"_fastqc_report.html &
+    rm "${r1%.fastq}"_val_1_fastqc.zip "${r3%.fastq}"_val_2_fastqc.zip &
+    wait
+fi
 
 
 ###   Align Reads   ###
@@ -101,16 +117,25 @@ echo "====================================================="
 echo "ALIGNING READS FOR " $name
 echo "====================================================="
 echo ""
-bismark --quiet --output $to --parallel $cores --bowtie2 --un --ambiguous \
-    -N 1 --temp_dir TempDelme --non_bs_mm --genome_folder "$ref"  \
-    -1 "$r1" -2 "$r3"
+if [[ -z $r3 ]]; then
+    # Single
+    bismark --quiet --output $to --parallel $cores --bowtie2 --un --ambiguous \
+        -N 1 --temp_dir TempDelme --non_bs_mm --genome_folder "$ref" "$r1"
+else
+    # Paired
+    bismark --quiet --output $to --parallel $cores --bowtie2 --un --ambiguous \
+        -N 1 --temp_dir TempDelme --non_bs_mm --genome_folder "$ref"  \
+        -1 "$r1" -2 "$r3"
+fi
 
 # Clean up output
-mv "${r1%.fastq}"_bismark_bt2_PE_report.txt "$to/$name".bam_bismark_report.txt
-mv "${r1%.fastq}"_bismark_bt2_pe.bam "$to/$name".bam
+mv "${r1%.fastq}"_bismark_bt2_*_report.txt "$to/$name".bam_bismark_report.txt
+mv "${r1%.fastq}"_bismark_bt2*.bam "$to/$name".bam
+rm -r TempDelme
 
 # Compress clean data
-gzip "$r1" "$r3"
+gzip "$r1" &
+if ! [[ -z $r3 ]]; then gzip "$r3" & fi
 
 
 ###   Extract Methylation Data   ###
@@ -118,12 +143,22 @@ echo "====================================================="
 echo "EXTRACTING MMETHYLATION DATA FOR " $name
 echo "====================================================="
 echo ""
-bismark_methylation_extractor --output $to --multicore $cores --paired-end "$to/$name".bam
+if [[ -z $r3 ]]; then
+    # Single
+    bismark_methylation_extractor --output $to --multicore $cores --single-end \
+        "$to/$name".bam &
+else
+    # Paired
+    bismark_methylation_extractor --output $to --multicore $cores --paired-end \
+        "$to/$name".bam &
+fi
+wait
 
 # Clean up output
 mv "$to/$name"_splitting_report.txt "$to/$name".bam_splitting_report.txt &
 mv "$to/$name".M-bias.txt "$to/$name".bam_M-bias.txt &
-countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt > "$to/$name"_methylation.cov &
+countz.sh "$to"/CpG_OT_"$name".txt "$to"/CpG_OB_"$name".txt >
+    "$to/$name"_methylation.cov &
 wait
 
 rm "$to"/CHG_*_"$name".txt &
@@ -132,5 +167,4 @@ rm "$to"/CpG_*_"$name".txt &
 wait
 
 # Make color bed file
-colorbed.awk -v name=$name "$to/$name"_methylation.cov \
-    > "$to/$name"_methylation.bed
+colorbed.awk -v name=$name "$to/$name"_methylation.cov > "$to/$name"_methylation.bed
