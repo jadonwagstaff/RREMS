@@ -1,12 +1,12 @@
 # rrems
 
-rrems is a pipeline for assembling sequences for reduced representation enzymatic methylation sequences. The assembled sequences are analyzed for methylation and filtered for 10X read depth. The final output is a .cov file with percent methylated at each CG (see .cov file documentation in the [Bismark user guide](http://felixkrueger.github.io/Bismark/Docs/)). 
+rrems is a pipeline for assembling reduced representation enzymatic methylation sequences. The assembled sequences are analyzed for methylation and filtered for 10X read depth. The final output is a .cov file with percent methylated at each CG (see .cov file documentation in the [Bismark user guide](http://felixkrueger.github.io/Bismark/Docs/)). 
 
 ## Installation
 
 ### Singularity
 
-For most high performance computing environments use singularity with the desired version of rrems:
+For most high performance computing environments, use singularity with the desired version of rrems:
 ```
 singularity build rrems-v0.1.1.sif docker://jadonwagstaff/rrems:v0.1.1
 ```
@@ -27,4 +27,4 @@ Your  "project" directory should have all of the same files as the folder from w
 
 ## Use
 
-The main script is rrems.sh. Instructions for use can be found by running ```singularity exec rrems-v0.1.1.sif rrems -h``` or  ```rrems.sh -h``` in the docker container.
+The main script is rrems.sh. Instructions for use can be found by running ```singularity exec rrems-v0.1.1.sif rrems -h``` or  ```rrems.sh -h``` in the docker container. Examples of use in paired end and single end read context can be found in the utah_chpc_pipelines folder.
