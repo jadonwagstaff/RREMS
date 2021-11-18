@@ -8,12 +8,13 @@ samples <- samples[order(sample_numbers)]
 
 methylp <- list()
 reads <- list()
-stat <- data.frame(SEQUENCE_PAIRS = double(),
-                   EFFICIENCY = double(),
-                   METHYLATED_CPG = double(),
-                   METHYLATED_CHG = double(),
-                   METHYLATED_CHH = double(),
-                   METHYLATED_UNKNOWN = double())
+stat <- data.frame(percentAlignedReads = double(),
+                   alignedReads = double(),
+                   methCpG = double(),
+                   methCHG = double(),
+                   methCHH = double(),
+                   methUnknownCNorCHN = double(),
+                   CGsW10XCoverage = double())
 
 
 # Read data
@@ -40,23 +41,28 @@ for (sample in samples) {
                      delim = ":\t+", col_names = FALSE) %>%
     mutate(X2 = parse_number(X2))
   
-  stat[sample, "SEQUENCE_PAIRS"] <- 
-    statin$X2[statin$X1 == "Sequence pairs analysed in total"]
-  stat[sample, "EFFICIENCY"] <- 
+  stat[sample, "percentAlignedReads"] <- 
     statin$X2[statin$X1 == "Mapping efficiency"]
-  stat[sample, "METHYLATED_CPG"] <- 
+  stat[sample, "alignedReads"] <- 
+    statin$X2[statin$X1 %in% c("Number of paired-end alignments with a unique best hit",
+                               "Number of alignments with a unique best hit from the different alignments")]
+  stat[sample, "methCpG"] <- 
     statin$X2[statin$X1 == "C methylated in CpG context"]
-  stat[sample, "METHYLATED_CHG"] <- 
+  stat[sample, "methCHG"] <- 
     statin$X2[statin$X1 == "C methylated in CHG context"]
-  stat[sample, "METHYLATED_CHH"] <- 
+  stat[sample, "methCHH"] <- 
     statin$X2[statin$X1 == "C methylated in CHH context"]
-  stat[sample, "METHYLATED_UNKNOWN"] <- 
-    statin$X2[statin$X1 == "C methylated in unknown context (CN or CHN)"]
+  stat[sample, "methUnknownCNorCHN"] <- 
+    statin$X2[statin$X1 %in% c("C methylated in unknown context (CN or CHN)",
+                               "C methylated in Unknown context (CN or CHN)")]
+  stat[sample, "CGsW10XCoverage"] <- nrow(input)
 }
 
 # Combine data
 methylp <- reduce(methylp, full_join, by = "LOCATION")
 reads <- reduce(reads, full_join, by = "LOCATION")
+stat <- stat %>%
+  rownames_to_column("SampleID")
 
 # Write Data
 # ------------------------------------------------------------------------------

@@ -8,13 +8,13 @@ show_help() {
    echo "Runs rrems pipeline with the following options:"
    echo "trim-galore --rrbs --fastqc (--paired if two files provided)"
    echo "bismark --quiet --bowtie2 --un --ambiguous"
-   echo "bismark_methylation_extractor --paired-end"
+   echo "bismark_methylation_extractor (--paired-end if two files provided)"
    echo
-   echo "Uses CpG context output from bismark_methylation_extractor"
-   echo "to get percent methylation for each CpG (combined top and"
-   echo "bottom strands)."
+   echo "Uses CpG context output from bismark_methylation_extractor to get"
+   echo "percent methylation for each CpG (combined top and bottom strands)."
    echo
-   echo "Requires a forward read file and a reverse read file."
+   echo "Requires a forward read fastq file and a reverse read fastq file if"
+   echo "paired end or a single fastqfile if single end."
    echo
    echo "Outputs a .cov file and a .bed file."
    echo

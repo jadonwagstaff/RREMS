@@ -7,5 +7,5 @@ cd /uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff
 
 java -jar /uufs/chpc.utah.edu/sys/pkg/fdt/0.9.20/fdt.jar \
     -noupdates -pull -r -c hci-bio-app.hci.utah.edu -d ./ \
-    /scratch/fdtswap/fdt_sandbox_gnomex/f7e98056-46d9-4516-b89d-e37a637736a0/18708R
+    your_given_path
 

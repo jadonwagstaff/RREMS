@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=50:00:00 --nodes=1 --ntasks=13 --mem=90G --account=varley-kp --partition=varley-shared-kp
+#SBATCH --time=120:00:00 --nodes=1 --account=varley-kp --partition=varley-kp
 
 ml singularity
 
