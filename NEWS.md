@@ -1,3 +1,9 @@
+# rrems v0.1.2
+
+## Backward compatable changes
+
+* countz.sh has an optional 3rd parameter for specifying minimum read depth (default is 10 which was hard coded in previous versions).
+
 # rrems v0.1.1
 
 ## Backward compatible changes
