@@ -38,7 +38,7 @@ do
     wait
     
     # Align reads and get methylation
-    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif rrems.sh \
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.2.sif rrems.sh \
         -c $p -n "$sample" -r "$refpath" "$to/$sample".fastq
     wait
 
