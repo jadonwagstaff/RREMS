@@ -40,10 +40,10 @@ do
     wait
     
     # Add barcodes
-    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif \
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.2.sif \
         add_barcodes.py -n 12  -b "$from/$sample"_*_R2_* \
         -d "$from/$sample"_*_R1_* -o "$to/$sample"_R1.fastq &
-    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif \
+    singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.2.sif \
         add_barcodes.py -n 12  -b "$from/$sample"_*_R2_* \
         -d "$from/$sample"_*_R3_* -o "$to/$sample"_R3.fastq &
     wait

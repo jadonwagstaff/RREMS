@@ -3,7 +3,7 @@
 
 echo "Data Transfer"
 
-cd /uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff
+cd /uufs/chpc.utah.edu/common/home/varley-group3/FastqFiles/JadonWagstaff/runs_rrems
 
 java -jar /uufs/chpc.utah.edu/sys/pkg/fdt/0.9.20/fdt.jar \
     -noupdates -pull -r -c hci-bio-app.hci.utah.edu -d ./ \

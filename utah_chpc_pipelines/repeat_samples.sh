@@ -18,7 +18,7 @@ p=12
 delim=_
 for i in ${!files[@]}; do
     singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.1.sif \
-    bismark_methylation_extractor --paired-end --multicore $p "${files[$i]}"
+    bismark_methylation_extractor --multicore $p "${files[$i]}"
     
     name="$(basename ${files[$i]} .bam)"
     if [ $i == 0 ]; then
@@ -50,7 +50,7 @@ rm CpG_*.txt &
 wait
 
 singularity exec --no-home --cleanenv "$sb"/rrems-v0.1.2.sif countz.sh \
-    OT.txt OB.txt > "$outfile"_methylation.cov
+    OT.txt OB.txt > "$outfile".cov
 
 rm OT.txt OB.txt
 

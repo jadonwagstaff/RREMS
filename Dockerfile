@@ -8,9 +8,9 @@ RUN conda install python=3.6 && \
     conda install -c bioconda fastqc=0.11.9 && \
     conda install -c bioconda trim-galore=0.6.7 && \
     conda install -c bioconda bowtie2=2.3.5.1 && \
-    conda install -c bioconda bismark=0.22.3 && \
-    apt-get install git && \
-    git clone https://github.com/jadonwagstaff/rrems
+    conda install -c bioconda bismark=0.22.3
+
+ADD . /rrems
 
 RUN mv rrems/rrems.sh usr/bin && \
     mv rrems/add_barcodes.py usr/bin && \
